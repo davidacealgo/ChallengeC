@@ -3,26 +3,38 @@ using ChallengeC.Services;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace ChallengeC.Repository
 {
-    public class MunicipalityRepository : IMunicipality
+    public class MunicipalityRepository
     {
-        private DBContext db;
-
-        public MunicipalityRepository(DBContext _db)
+        public static bool GetMunicipality(Municipality municipality)
         {
-            db = _db;
-        }
+            var connectionString = "Data source=.;Initial Catalog=Challenge;Integrated Security=True";
 
-        public IEnumerable<Municipality> GetMunicipalities => db.Municipality;
+            var query = "SELECT Names FROM Municipality";
 
-        public Municipality GetMunicipality(int Id)
-        {
-            Municipality dbEntity = db.Municipality.Find(Id);
-            return dbEntity;
+            query = query.Replace("@Names", municipality.Names);
+
+            SqlConnection connection = new SqlConnection(connectionString);
+
+            try
+            {
+                connection.Open();
+                SqlCommand command = new SqlCommand(query, connection);
+                command.ExecuteNonQuery();
+                command.Dispose();
+                connection.Close();
+                return true;
+            }
+            catch
+            {
+                //throw;
+                return false;
+            }
         }
     }
 }
